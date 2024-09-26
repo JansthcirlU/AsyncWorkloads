@@ -1,15 +1,17 @@
+using AsyncWorkloads.Workloads;
+
 namespace AsyncWorkloads.Results;
 
 public readonly record struct WorkloadError
 {
     public Exception Exception { get; }
-    public Guid WorkloadId { get; }
-    public Guid CorrelationId { get; }
+    public WorkloadId WorkloadId { get; }
+    public CorrelationId CorrelationId { get; }
 
     public WorkloadError(
         Exception exception,
-        Guid workloadId,
-        Guid correlationId)
+        WorkloadId workloadId,
+        CorrelationId correlationId)
     {
         Exception = exception;
         WorkloadId = workloadId;
