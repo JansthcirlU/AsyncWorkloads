@@ -38,7 +38,7 @@ public abstract class AsyncWorkload<TPrerequisite, TResult> :
 {
     private WorkloadState _workloadState = WorkloadState.Undefined;
 
-    public WorkloadState WorkloadState => throw new NotImplementedException();
+    public WorkloadState WorkloadState => _workloadState;
     public IPrerequisiteAsyncWorkloads<TPrerequisite> PrerequisiteWorkloads { get; }
 
     public AsyncWorkload(IPrerequisiteAsyncWorkloads<TPrerequisite> prerequisiteWorkloads)
