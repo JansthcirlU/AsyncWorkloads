@@ -1,3 +1,5 @@
+using AsyncWorkloads.Workloads;
+
 namespace AsyncWorkloads.Results;
 
 public readonly struct Result<TValue>
@@ -19,18 +21,21 @@ public readonly struct Result<TValue>
     public static Result<TValue> Failure(WorkloadError error)
         => new(default, error);
 
+    public static Result<TValue> Failure(Exception exception, WorkloadId workloadId, CorrelationId correlationId)
+        => Failure(new(exception, workloadId, correlationId));
+
     public TReturn Match<TReturn>(Func<TValue, TReturn> value, Func<WorkloadError, TReturn> error)
         => _error is null
             ? value(_value!)
-            : error((WorkloadError)_error);
+            : error(_error);
     
     public Result<TResult> Map<TResult>(Func<TValue, TResult> map)
         => _error is null 
             ? Result<TResult>.Success(map(_value!))
-            : Result<TResult>.Failure((WorkloadError)_error);
+            : Result<TResult>.Failure(_error);
 
     public Result<TResult> Bind<TResult>(Func<TValue, Result<TResult>> bind)
         => _error is null
             ? bind(_value!)
-            : Result<TResult>.Failure((WorkloadError)_error);
+            : Result<TResult>.Failure(_error);
 }

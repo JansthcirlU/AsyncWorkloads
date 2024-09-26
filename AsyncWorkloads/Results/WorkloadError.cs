@@ -2,7 +2,7 @@ using AsyncWorkloads.Workloads;
 
 namespace AsyncWorkloads.Results;
 
-public readonly record struct WorkloadError
+public record WorkloadError
 {
     public Exception Exception { get; }
     public WorkloadId WorkloadId { get; }
