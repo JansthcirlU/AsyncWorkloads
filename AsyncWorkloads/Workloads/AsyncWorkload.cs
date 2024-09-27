@@ -59,6 +59,12 @@ public abstract class AsyncWorkload<TResult> : IAsyncWorkload<TResult>
         }
         return _result;
     }
+
+    protected WorkloadResult<TValue> Success<TValue>(TValue @value, CorrelationId correlationId)
+        => WorkloadResult<TValue>.Success(@value, WorkloadId, correlationId);
+    
+    protected WorkloadResult<TValue> Failure<TValue>(Exception exception, CorrelationId correlationId)
+        => WorkloadResult<TValue>.Failure(exception, WorkloadId, correlationId);
 }
 
 /// <summary>
@@ -127,4 +133,10 @@ public abstract class AsyncWorkload<TPrerequisite, TResult> :
         }
         return _result;
     }
+
+    protected WorkloadResult<TValue> Success<TValue>(TValue @value, CorrelationId correlationId)
+        => WorkloadResult<TValue>.Success(@value, WorkloadId, correlationId);
+    
+    protected WorkloadResult<TValue> Failure<TValue>(Exception exception, CorrelationId correlationId)
+        => WorkloadResult<TValue>.Failure(exception, WorkloadId, correlationId);
 }
