@@ -14,6 +14,6 @@ public class CheckAzLoginWorkload : AsyncWorkload<bool>
     {
         await Task.Delay(10_000, cancellationToken);
         double next = Random.Shared.NextDouble();
-        return WorkloadResult<bool>.Success(next > 0.8);
+        return WorkloadResult<bool>.Success(next > 0.8, WorkloadId, correlationId);
     }
 }

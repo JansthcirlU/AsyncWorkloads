@@ -36,10 +36,10 @@ public class AzureWorkerService : BackgroundService
                     _logger.LogInformation("Subscription found: {Subscription}", value);
                     return value;
                 },
-                error =>
+                exception =>
                 {
-                    _logger.LogError("An exception occurred: {Message}", error.Exception.Message);
-                    return error.Exception.Message;
+                    _logger.LogError("An exception occurred: {Message}", exception.Message);
+                    return exception.Message;
                 }
             );
     }

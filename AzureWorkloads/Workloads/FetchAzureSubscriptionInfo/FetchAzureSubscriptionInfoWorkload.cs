@@ -16,6 +16,6 @@ public class FetchAzureSubscriptionInfoWorkload : AsyncWorkload<bool, string>
         => Task.FromResult(
                 prerequisite.Bind(
                     met => met
-                        ? WorkloadResult<string>.Success(Guid.NewGuid().ToString())
+                        ? WorkloadResult<string>.Success(Guid.NewGuid().ToString(), WorkloadId, correlationId)
                         : WorkloadResult<string>.Failure(new Exception("Guid info could not be found."), WorkloadId, correlationId)));
 }

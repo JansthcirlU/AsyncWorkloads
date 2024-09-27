@@ -9,58 +9,84 @@ namespace AsyncWorkloads.Results;
 public record WorkloadResult<TValue>
 {
     private readonly TValue? _value;
-    private readonly WorkloadError? _error;
+    private readonly Exception? _exception;
 
     /// <summary>
-    /// Indicates whether the workload completed successfully.
+    /// Identifier of the workload that yielded this result.
     /// </summary>
-    public bool IsSuccess => _error is null;
+    /// <value></value>
+    public WorkloadId WorkloadId { get; }
 
-    private WorkloadResult(TValue? value, WorkloadError? error)
+    /// <summary>
+    /// Identifier of the context in which the result was yielded.
+    /// </summary>
+    /// <value></value>
+    public CorrelationId CorrelationId { get; }
+
+    /// <summary>
+    /// Indicates whether the workload result has a value or an error.
+    /// </summary>
+    public bool IsSuccess => _exception is null;
+
+    private WorkloadResult(TValue? value, Exception? exception, WorkloadId workloadId, CorrelationId correlationId)
     {
         _value = value;
-        _error = error;
+        _exception = exception;
+        WorkloadId = workloadId;
+        CorrelationId = correlationId;
     }
 
     /// <summary>
     /// Creates a successful result containing the provided value.
     /// </summary>
-    public static WorkloadResult<TValue> Success(TValue value)
-        => new(value, null);
-    
-    /// <summary>
-    /// Creates a failure result containing the given error information.
-    /// </summary>
-    public static WorkloadResult<TValue> Failure(WorkloadError error)
-        => new(default, error);
+    public static WorkloadResult<TValue> Success(TValue value, WorkloadId workloadId, CorrelationId correlationId)
+        => new(value, null, workloadId, correlationId);
 
     /// <summary>
     /// Creates a failure result from an exception, workload identifier and correlation identifier.
     /// </summary>
     public static WorkloadResult<TValue> Failure(Exception exception, WorkloadId workloadId, CorrelationId correlationId)
-        => Failure(new(exception, workloadId, correlationId));
+        => new(default, exception, workloadId, correlationId);
 
     /// <summary>
     /// Evaluates the result and returns either the success value or the error using the provided functions.
     /// </summary>
-    public TReturn Match<TReturn>(Func<TValue, TReturn> value, Func<WorkloadError, TReturn> error)
-        => _error is null
+    public TReturn Match<TReturn>(Func<TValue, TReturn> value, Func<Exception, TReturn> error)
+        => _exception is null
             ? value(_value!)
-            : error(_error);
+            : error(_exception);
     
     /// <summary>
     /// Transforms the success value using the provided mapping function, or returns the error unchanged.
     /// </summary>
-    public WorkloadResult<TResult> Map<TResult>(Func<TValue, TResult> map)
-        => _error is null 
-            ? WorkloadResult<TResult>.Success(map(_value!))
-            : WorkloadResult<TResult>.Failure(_error);
+    public WorkloadResult<TResult> Map<TResult>(Func<TValue, TResult> map, WorkloadId workloadId, CorrelationId correlationId)
+    {
+        try
+        {
+            return _exception is null 
+                ? WorkloadResult<TResult>.Success(map(_value!), workloadId, correlationId)
+                : WorkloadResult<TResult>.Failure(_exception, workloadId, correlationId);
+        }
+        catch (Exception ex)
+        {
+            return WorkloadResult<TResult>.Failure(ex, workloadId, correlationId);
+        }
+    }
 
     /// <summary>
     /// Binds the success value to a new result using the provided binding function, or returns the error unchanged.
     /// </summary>
     public WorkloadResult<TResult> Bind<TResult>(Func<TValue, WorkloadResult<TResult>> bind)
-        => _error is null
-            ? bind(_value!)
-            : WorkloadResult<TResult>.Failure(_error);
+    {
+        try
+        {
+            return _exception is null
+                ? bind(_value!)
+                : WorkloadResult<TResult>.Failure(_exception, WorkloadId, CorrelationId);
+        }
+        catch (Exception ex)
+        {
+            return WorkloadResult<TResult>.Failure(ex, WorkloadId, CorrelationId);
+        }
+    }
 }
