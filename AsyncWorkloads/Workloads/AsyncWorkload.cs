@@ -4,6 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace AsyncWorkloads.Workloads;
 
+/// <summary>
+/// Abstract class encapsulating the fundamental execution logic of an asynchronous workflow.
+/// </summary>
+/// <typeparam name="TResult">Expected result from running the async workload.</typeparam>
 public abstract class AsyncWorkload<TResult> : IAsyncWorkload<TResult>
 {
     private WorkloadState _workloadState = WorkloadState.Undefined;
@@ -18,6 +22,12 @@ public abstract class AsyncWorkload<TResult> : IAsyncWorkload<TResult>
         _logger = logger;
     }
 
+    /// <summary>
+    /// Executes the core logic of the workload asynchronously. 
+    /// This method is responsible for performing the actual work and must be implemented by derived classes.
+    /// </summary>
+    /// <param name="correlationId">Unique identifier to track the workload execution context.</param>
+    /// <param name="cancellationToken">Token to cancel the execution if needed.</param>
     protected abstract Task<WorkloadResult<TResult>> ExecuteWorkAsync(CorrelationId correlationId, CancellationToken cancellationToken);
 
     public async Task<WorkloadResult<TResult>> ExecuteAsync(CorrelationId correlationId, CancellationToken cancellationToken)
@@ -51,6 +61,11 @@ public abstract class AsyncWorkload<TResult> : IAsyncWorkload<TResult>
     }
 }
 
+/// <summary>
+/// Abstract class encapsulating the fundamental execution logic of an asynchronous workflow with prerequisites.
+/// </summary>
+/// <typeparam name="TPrerequisite">Expected combined result after running all the prerequisite workloads.</typeparam>
+/// <typeparam name="TResult">Expected result from running the async workload.</typeparam>
 public abstract class AsyncWorkload<TPrerequisite, TResult> :
     IAsyncWorkload<TPrerequisite, TResult>
 {
@@ -70,6 +85,13 @@ public abstract class AsyncWorkload<TPrerequisite, TResult> :
         PrerequisiteWorkloads = prerequisiteWorkloads;
     }
 
+    /// <summary>
+    /// Executes the core logic of the workload asynchronously. 
+    /// This method is responsible for performing the actual work and must be implemented by derived classes.
+    /// </summary>
+    /// <param name="prerequisite">The actual result from running the prerequisite workloads.</param>
+    /// <param name="correlationId">Unique identifier to track the workload execution context.</param>
+    /// <param name="cancellationToken">Token to cancel the execution if needed.</param>
     protected abstract Task<WorkloadResult<TResult>> ExecuteWorkAsync(WorkloadResult<TPrerequisite> prerequisite, CorrelationId correlationId, CancellationToken cancellationToken);
 
     public async Task<WorkloadResult<TResult>> ExecuteAsync(CorrelationId correlationId, CancellationToken cancellationToken)
