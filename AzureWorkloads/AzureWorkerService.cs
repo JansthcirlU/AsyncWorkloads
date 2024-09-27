@@ -1,4 +1,5 @@
 using AsyncWorkloads.Results;
+using AsyncWorkloads.Workloads;
 using AzureWorkloads.Workloads.CheckAzLogin;
 using AzureWorkloads.Workloads.FetchAzureSubscriptionInfo;
 using Microsoft.Extensions.Hosting;
@@ -17,10 +18,17 @@ public class AzureWorkerService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        CheckAzLoginWorkload checkAzLoginWorkload = new();
-        FetchAzureSubscriptionInfoWorkloadPrerequisite fetchAzureSubscriptionInfoWorkloadPrerequisite = new(checkAzLoginWorkload);
-        FetchAzureSubscriptionInfoWorkload fetchAzureSubscriptionInfoWorkload = new(fetchAzureSubscriptionInfoWorkloadPrerequisite);
-        Result<string> subscription = await fetchAzureSubscriptionInfoWorkload.ExecuteAsync(stoppingToken);
+        // Enable logging
+        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+        ILogger<CheckAzLoginWorkload> checkAzLoginLogger = factory.CreateLogger<CheckAzLoginWorkload>();
+        ILogger<FetchAzureSubscriptionInfoWorkloadPrerequisite> fetchSubscriptionInfoPrerequisiteLogger = factory.CreateLogger<FetchAzureSubscriptionInfoWorkloadPrerequisite>();
+        ILogger<FetchAzureSubscriptionInfoWorkload> fetchSubscriptionInfoLogger = factory.CreateLogger<FetchAzureSubscriptionInfoWorkload>();
+        
+        CorrelationId correlationId = CorrelationId.Create();
+        CheckAzLoginWorkload checkAzLoginWorkload = new(checkAzLoginLogger);
+        FetchAzureSubscriptionInfoWorkloadPrerequisite fetchAzureSubscriptionInfoWorkloadPrerequisite = new(fetchSubscriptionInfoPrerequisiteLogger, checkAzLoginWorkload);
+        FetchAzureSubscriptionInfoWorkload fetchAzureSubscriptionInfoWorkload = new(fetchSubscriptionInfoLogger, fetchAzureSubscriptionInfoWorkloadPrerequisite);
+        WorkloadResult<string> subscription = await fetchAzureSubscriptionInfoWorkload.ExecuteAsync(correlationId, stoppingToken);
         string test = subscription
             .Match(
                 value => 
@@ -28,10 +36,10 @@ public class AzureWorkerService : BackgroundService
                     _logger.LogInformation("Subscription found: {Subscription}", value);
                     return value;
                 },
-                exception =>
+                error =>
                 {
-                    _logger.LogError("An exception occurred: {Message}", exception.Message);
-                    return exception.Message;
+                    _logger.LogError("An exception occurred: {Message}", error.Exception.Message);
+                    return error.Exception.Message;
                 }
             );
     }

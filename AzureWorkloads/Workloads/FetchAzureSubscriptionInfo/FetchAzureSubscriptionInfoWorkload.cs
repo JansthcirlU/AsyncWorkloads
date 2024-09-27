@@ -1,18 +1,21 @@
 using AsyncWorkloads.Results;
 using AsyncWorkloads.Workloads;
+using Microsoft.Extensions.Logging;
 
 namespace AzureWorkloads.Workloads.FetchAzureSubscriptionInfo;
 
 public class FetchAzureSubscriptionInfoWorkload : AsyncWorkload<bool, string>
 {
-    public FetchAzureSubscriptionInfoWorkload(FetchAzureSubscriptionInfoWorkloadPrerequisite prerequisiteWorkloads) : base(prerequisiteWorkloads)
+    public FetchAzureSubscriptionInfoWorkload(
+        ILogger<FetchAzureSubscriptionInfoWorkload> logger,
+        FetchAzureSubscriptionInfoWorkloadPrerequisite prerequisiteWorkloads) : base(logger, prerequisiteWorkloads)
     {
     }
 
-    protected override Task<Result<string>> ExecuteWorkAsync(Result<bool> prerequisite, CancellationToken cancellationToken)
+    protected override Task<WorkloadResult<string>> ExecuteWorkAsync(WorkloadResult<bool> prerequisite, CorrelationId correlationId, CancellationToken cancellationToken)
         => Task.FromResult(
                 prerequisite.Bind(
                     met => met
-                        ? Result<string>.Success(Guid.NewGuid().ToString())
-                        : Result<string>.Failure(new Exception("Guid info could not be found."))));
+                        ? WorkloadResult<string>.Success(Guid.NewGuid().ToString())
+                        : WorkloadResult<string>.Failure(new Exception("Guid info could not be found."), WorkloadId, correlationId)));
 }

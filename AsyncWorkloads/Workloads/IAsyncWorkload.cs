@@ -5,8 +5,9 @@ namespace AsyncWorkloads.Workloads;
 
 public interface IAsyncWorkload<TResult>
 {
+    WorkloadId WorkloadId { get; }
     WorkloadState WorkloadState { get; }
-    Task<Result<TResult>> ExecuteAsync(CancellationToken cancellationToken);
+    Task<WorkloadResult<TResult>> ExecuteAsync(CorrelationId correlationId, CancellationToken cancellationToken);
 }
 
 public interface IAsyncWorkload<TPrerequisite, TResult> : IAsyncWorkload<TResult>

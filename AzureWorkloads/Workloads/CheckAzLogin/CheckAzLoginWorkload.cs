@@ -1,14 +1,19 @@
 ﻿using AsyncWorkloads.Results;
 using AsyncWorkloads.Workloads;
+using Microsoft.Extensions.Logging;
 
 namespace AzureWorkloads.Workloads.CheckAzLogin;
 
 public class CheckAzLoginWorkload : AsyncWorkload<bool>
 {
-    protected override async Task<Result<bool>> ExecuteWorkAsync(CancellationToken cancellationToken)
+    public CheckAzLoginWorkload(ILogger<CheckAzLoginWorkload> logger) : base(logger)
     {
-        await Task.Delay(1000, cancellationToken);
+    }
+
+    protected override async Task<WorkloadResult<bool>> ExecuteWorkAsync(CorrelationId correlationId, CancellationToken cancellationToken)
+    {
+        await Task.Delay(10_000, cancellationToken);
         double next = Random.Shared.NextDouble();
-        return Result<bool>.Success(next > 0.8);
+        return WorkloadResult<bool>.Success(next > 0.8);
     }
 }
