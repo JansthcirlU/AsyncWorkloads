@@ -64,29 +64,29 @@ public record WorkloadResult<TValue>
         try
         {
             return _exception is null 
-                ? WorkloadResult<TResult>.Success(map(_value!), workloadId, correlationId)
-                : WorkloadResult<TResult>.Failure(_exception, workloadId, correlationId);
+                ? WorkloadResult<TResult>.Success(map(_value!), workloadId, correlationId) // Update IDs when successful
+                : WorkloadResult<TResult>.Failure(_exception, WorkloadId, CorrelationId); // Propagate existing error
         }
         catch (Exception ex)
         {
-            return WorkloadResult<TResult>.Failure(ex, workloadId, correlationId);
+            return WorkloadResult<TResult>.Failure(ex, workloadId, correlationId); // Update IDs to reflect where the failure occurred
         }
     }
 
     /// <summary>
     /// Binds the success value to a new result using the provided binding function, or returns the error unchanged.
     /// </summary>
-    public WorkloadResult<TResult> Bind<TResult>(Func<TValue, WorkloadResult<TResult>> bind)
+    public WorkloadResult<TResult> Bind<TResult>(Func<TValue, WorkloadResult<TResult>> bind, WorkloadId workloadId, CorrelationId correlationId)
     {
         try
         {
             return _exception is null
                 ? bind(_value!)
-                : WorkloadResult<TResult>.Failure(_exception, WorkloadId, CorrelationId);
+                : WorkloadResult<TResult>.Failure(_exception, WorkloadId, CorrelationId); // Propagate existing error
         }
         catch (Exception ex)
         {
-            return WorkloadResult<TResult>.Failure(ex, WorkloadId, CorrelationId);
+            return WorkloadResult<TResult>.Failure(ex, workloadId, correlationId); // Use ids for the result that failed to bind
         }
     }
 }
