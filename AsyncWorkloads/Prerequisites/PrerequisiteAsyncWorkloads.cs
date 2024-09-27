@@ -27,11 +27,6 @@ public abstract class PrerequisiteAsyncWorkloads<T1, TResult> :
     {
         FirstPrerequisite = firstPrerequisite;
     }
-
-    protected override Task<WorkloadResult<TResult>> ExecuteWorkAsync(CorrelationId correlationId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 }
 
 public abstract class PrerequisiteAsyncWorkloads<T1, T2, TResult> :
