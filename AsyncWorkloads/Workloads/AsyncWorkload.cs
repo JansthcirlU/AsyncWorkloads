@@ -8,7 +8,7 @@ namespace AsyncWorkloads.Workloads;
 /// Abstract class encapsulating the fundamental execution logic of an asynchronous workflow.
 /// </summary>
 /// <typeparam name="TResult">Expected result from running the async workload.</typeparam>
-public abstract class AsyncWorkload<TResult> : IAsyncWorkload<TResult>
+internal abstract class AsyncWorkload<TResult> : IAsyncWorkload<TResult>
 {
     private WorkloadState _workloadState = WorkloadState.Undefined;
     private WorkloadResult<TResult>? _result;
@@ -72,7 +72,7 @@ public abstract class AsyncWorkload<TResult> : IAsyncWorkload<TResult>
 /// </summary>
 /// <typeparam name="TPrerequisite">Expected combined result after running all the prerequisite workloads.</typeparam>
 /// <typeparam name="TResult">Expected result from running the async workload.</typeparam>
-public abstract class AsyncWorkload<TPrerequisite, TResult> :
+internal abstract class AsyncWorkload<TPrerequisite, TResult> :
     IAsyncWorkload<TPrerequisite, TResult>
 {
     private WorkloadState _workloadState = WorkloadState.Undefined;
