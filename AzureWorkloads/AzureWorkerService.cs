@@ -21,13 +21,11 @@ public class AzureWorkerService : BackgroundService
         // Enable logging
         using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
         ILogger<CheckAzLoginWorkload> checkAzLoginLogger = factory.CreateLogger<CheckAzLoginWorkload>();
-        ILogger<FetchAzureSubscriptionInfoWorkloadPrerequisite> fetchSubscriptionInfoPrerequisiteLogger = factory.CreateLogger<FetchAzureSubscriptionInfoWorkloadPrerequisite>();
         ILogger<FetchAzureSubscriptionInfoWorkload> fetchSubscriptionInfoLogger = factory.CreateLogger<FetchAzureSubscriptionInfoWorkload>();
         
         CorrelationId correlationId = CorrelationId.Create();
         CheckAzLoginWorkload checkAzLoginWorkload = new(checkAzLoginLogger);
-        FetchAzureSubscriptionInfoWorkloadPrerequisite fetchAzureSubscriptionInfoWorkloadPrerequisite = new(fetchSubscriptionInfoPrerequisiteLogger, checkAzLoginWorkload);
-        FetchAzureSubscriptionInfoWorkload fetchAzureSubscriptionInfoWorkload = new(fetchSubscriptionInfoLogger, fetchAzureSubscriptionInfoWorkloadPrerequisite);
+        FetchAzureSubscriptionInfoWorkload fetchAzureSubscriptionInfoWorkload = new(fetchSubscriptionInfoLogger, checkAzLoginWorkload);
         WorkloadResult<string> subscription = await fetchAzureSubscriptionInfoWorkload.ExecuteAsync(correlationId, stoppingToken);
         string test = subscription
             .Match(

@@ -1,24 +1,29 @@
 using AsyncWorkloads.Results;
 using AsyncWorkloads.Workloads;
+using AsyncWorkloads.Workloads.Prerequisites;
+using AzureWorkloads.Workloads.CheckAzLogin;
 using Microsoft.Extensions.Logging;
 
 namespace AzureWorkloads.Workloads.FetchAzureSubscriptionInfo;
 
-public class FetchAzureSubscriptionInfoWorkload : AsyncWorkload<bool, string>
+public class FetchAzureSubscriptionInfoWorkload : PrerequisiteAsyncWorkload<CheckAzLoginWorkload, bool, string>
 {
     public FetchAzureSubscriptionInfoWorkload(
         ILogger<FetchAzureSubscriptionInfoWorkload> logger,
-        FetchAzureSubscriptionInfoWorkloadPrerequisite prerequisiteWorkloads) : base(logger, prerequisiteWorkloads)
+        CheckAzLoginWorkload checkAzLoginWorkload) : base(logger, checkAzLoginWorkload)
     {
     }
 
-    protected override Task<WorkloadResult<string>> ExecuteWorkAsync(WorkloadResult<bool> prerequisite, CorrelationId correlationId, CancellationToken cancellationToken)
-        => Task.FromResult(
-                prerequisite.Bind(
-                    met => met
-                        ? Success(Guid.NewGuid().ToString(), correlationId)
-                        : Failure<string>(new Exception("Guid info could not be found."), correlationId),
-                    WorkloadId,
-                    correlationId)
-                );
+    protected override async Task<WorkloadResult<string>> ExecuteWorkAsync(CorrelationId correlationId, CancellationToken cancellationToken)
+    {
+        CheckAzLoginWorkload checkAzLoginWorkload = FirstPrerequisite;
+        WorkloadResult<bool> checkAzLoginResult = await checkAzLoginWorkload.ExecuteAsync(correlationId, cancellationToken);
+        WorkloadResult<string> result = checkAzLoginResult.Bind(
+            met => met
+                ? Success(Guid.NewGuid().ToString(), correlationId)
+                : Failure<string>(new Exception("Guid info could not be found."), correlationId),
+            WorkloadId,
+            correlationId);
+        return result;
+    }
 }

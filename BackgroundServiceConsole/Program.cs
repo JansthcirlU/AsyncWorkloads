@@ -9,7 +9,6 @@ HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services
     .AddHostedService<AzureWorkerService>()
     .AddSingleton<CheckAzLoginWorkload>()
-    .AddSingleton<FetchAzureSubscriptionInfoWorkloadPrerequisite>()
     .AddSingleton<FetchAzureSubscriptionInfoWorkload>()
     .AddLogging(builder => builder.AddConsole());
 
