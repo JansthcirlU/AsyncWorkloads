@@ -11,7 +11,7 @@ public class FetchAzureSubscriptionInfoWorkload : AsyncWorkload<string>
 
     public FetchAzureSubscriptionInfoWorkload(
         ILogger<FetchAzureSubscriptionInfoWorkload> logger,
-        CheckAzLoginWorkload checkAzLoginWorkload) : base(logger)
+        CheckAzLoginWorkload checkAzLoginWorkload) : base("Fetch Azure subscription info", logger)
     {
         CheckAzLoginWorkload = checkAzLoginWorkload;
     }

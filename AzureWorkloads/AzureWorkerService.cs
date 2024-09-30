@@ -1,41 +1,42 @@
 using AsyncWorkloads.Results;
 using AsyncWorkloads.Workloads;
-using AzureWorkloads.Workloads.CheckAzLogin;
-using AzureWorkloads.Workloads.FetchAzureSubscriptionInfo;
+using AzureWorkloads.Workloads.Experimental;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace AzureWorkloads;
 
 public class AzureWorkerService : BackgroundService
-{
+{          
     private readonly ILogger<AzureWorkerService> _logger;
-    private readonly FetchAzureSubscriptionInfoWorkload _fetchAzureSubscriptionInfoWorkload;
+    private readonly LogEvenRepetitionsWorkload _logEvenRepetitionsWorkload;
 
     public AzureWorkerService(
         ILogger<AzureWorkerService> logger,
-        FetchAzureSubscriptionInfoWorkload fetchAzureSubscriptionInfoWorkload)
+        LogEvenRepetitionsWorkload logEvenRepetitionsWorkload)
     {
         _logger = logger;
-        _fetchAzureSubscriptionInfoWorkload = fetchAzureSubscriptionInfoWorkload;
+        _logEvenRepetitionsWorkload = logEvenRepetitionsWorkload;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Starting the worker.");
         CorrelationId correlationId = CorrelationId.Create();
-        WorkloadResult<string> subscription = await _fetchAzureSubscriptionInfoWorkload.ExecuteAsync(correlationId, stoppingToken);
-        string test = subscription
+        WorkloadResult<string> logEvenRepetitionsResult = await _logEvenRepetitionsWorkload.ExecuteAsync(correlationId, stoppingToken);
+        logEvenRepetitionsResult
             .Match(
-                value => 
+                value =>
                 {
-                    _logger.LogInformation("Subscription found: {Subscription}", value);
+                    Console.WriteLine(value);
                     return value;
                 },
                 exception =>
                 {
-                    _logger.LogError("An exception occurred: {Message}", exception.Message);
+                    Console.WriteLine(exception.Message);
                     return exception.Message;
                 }
             );
+        _logger.LogInformation("Worker finished.");
     }
 }

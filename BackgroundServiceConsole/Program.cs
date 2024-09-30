@@ -1,6 +1,5 @@
 ﻿using AzureWorkloads;
-using AzureWorkloads.Workloads.CheckAzLogin;
-using AzureWorkloads.Workloads.FetchAzureSubscriptionInfo;
+using AzureWorkloads.Workloads.Experimental;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,8 +7,7 @@ using Microsoft.Extensions.Logging;
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services
     .AddHostedService<AzureWorkerService>()
-    .AddSingleton<CheckAzLoginWorkload>()
-    .AddSingleton<FetchAzureSubscriptionInfoWorkload>()
+    .AddExperimentalWorkloads()
     .AddLogging(builder => builder.AddConsole());
 
 IHost host = builder.Build();
