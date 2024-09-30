@@ -1,7 +1,7 @@
 using AsyncWorkloads.Results;
 using Microsoft.Extensions.Logging;
 
-namespace AsyncWorkloads.Workloads.Base;
+namespace AsyncWorkloads.Workloads;
 
 /// <summary>
 /// Abstract class encapsulating the fundamental execution logic of an asynchronous workflow.

@@ -10,23 +10,20 @@ namespace AzureWorkloads;
 public class AzureWorkerService : BackgroundService
 {
     private readonly ILogger<AzureWorkerService> _logger;
+    private readonly FetchAzureSubscriptionInfoWorkload _fetchAzureSubscriptionInfoWorkload;
 
-    public AzureWorkerService(ILogger<AzureWorkerService> logger)
+    public AzureWorkerService(
+        ILogger<AzureWorkerService> logger,
+        FetchAzureSubscriptionInfoWorkload fetchAzureSubscriptionInfoWorkload)
     {
         _logger = logger;
+        _fetchAzureSubscriptionInfoWorkload = fetchAzureSubscriptionInfoWorkload;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Enable logging
-        using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-        ILogger<CheckAzLoginWorkload> checkAzLoginLogger = factory.CreateLogger<CheckAzLoginWorkload>();
-        ILogger<FetchAzureSubscriptionInfoWorkload> fetchSubscriptionInfoLogger = factory.CreateLogger<FetchAzureSubscriptionInfoWorkload>();
-        
         CorrelationId correlationId = CorrelationId.Create();
-        CheckAzLoginWorkload checkAzLoginWorkload = new(checkAzLoginLogger);
-        FetchAzureSubscriptionInfoWorkload fetchAzureSubscriptionInfoWorkload = new(fetchSubscriptionInfoLogger, checkAzLoginWorkload);
-        WorkloadResult<string> subscription = await fetchAzureSubscriptionInfoWorkload.ExecuteAsync(correlationId, stoppingToken);
+        WorkloadResult<string> subscription = await _fetchAzureSubscriptionInfoWorkload.ExecuteAsync(correlationId, stoppingToken);
         string test = subscription
             .Match(
                 value => 
