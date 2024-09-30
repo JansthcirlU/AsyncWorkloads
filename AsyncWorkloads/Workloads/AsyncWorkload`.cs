@@ -15,9 +15,13 @@ public abstract class AsyncWorkload<TResult>
 
     public WorkloadState WorkloadState => _workloadState;
     public WorkloadId WorkloadId { get; } = WorkloadId.Create();
+    public string Name { get; }
 
-    public AsyncWorkload(ILogger<AsyncWorkload<TResult>> logger)
+    public AsyncWorkload(
+        string name,
+        ILogger<AsyncWorkload<TResult>> logger)
     {
+        Name = name;
         _logger = logger;
     }
 
@@ -37,7 +41,7 @@ public abstract class AsyncWorkload<TResult>
         try
         {
             // Start the workload and save the result
-            _logger.LogInformation("Starting workload {WorkloadId} with correlation {CorrelationId}.", WorkloadId, correlationId);
+            _logger.LogInformation("Starting workload \"{Name}\" ({WorkloadId}) with correlation {CorrelationId}.", Name, WorkloadId, correlationId);
             _workloadState = WorkloadState.Running;
             _result = await ExecuteWorkAsync(correlationId, cancellationToken);
             _workloadState = _result.IsSuccess ? WorkloadState.Completed : WorkloadState.Faulted;
@@ -45,14 +49,14 @@ public abstract class AsyncWorkload<TResult>
         catch (OperationCanceledException operationCanceledException)
         {
             // If cancelled, save the failed result
-            _logger.LogWarning("Cancelled workload {WorkloadId} with correlation {CorrelationId}.", WorkloadId, correlationId);
+            _logger.LogWarning("Cancelled workload \"{Name}\" ({WorkloadId}) with correlation {CorrelationId}.", Name, WorkloadId, correlationId);
             _result = WorkloadResult<TResult>.Failure(operationCanceledException, WorkloadId, correlationId);
             _workloadState = WorkloadState.Cancelled;
         }
         catch (Exception ex)
         {
             // If faulted, save the failed result as well
-            _logger.LogError(ex, "Exception during workload {WorkloadId} with correlation {CorrelationId}.", WorkloadId, correlationId);
+            _logger.LogError(ex, "Exception during workload \"{Name}\" ({WorkloadId}) with correlation {CorrelationId}.", Name, WorkloadId, correlationId);
             _result = WorkloadResult<TResult>.Failure(ex, WorkloadId, correlationId);
             _workloadState = WorkloadState.Faulted;
         }

@@ -37,6 +37,18 @@ public record WorkloadResult<TValue>
     }
 
     /// <summary>
+    /// Tries to fetch the value of the result if result is successful, else returns default.
+    /// </summary>
+    public TValue? GetValueOrDefault()
+        => _value;
+    
+    /// <summary>
+    /// Tries to fetch the exception of the result if result is not successful, else returns default.
+    /// </summary>
+    public Exception? GetExceptionOrDefault()
+        => _exception;
+
+    /// <summary>
     /// Creates a successful result containing the provided value.
     /// </summary>
     public static WorkloadResult<TValue> Success(TValue value, WorkloadId workloadId, CorrelationId correlationId)
@@ -87,6 +99,21 @@ public record WorkloadResult<TValue>
         catch (Exception ex)
         {
             return WorkloadResult<TResult>.Failure(ex, workloadId, correlationId); // Use ids for the result that failed to bind
+        }
+    }
+
+    public WorkloadResult<TCombined> CombineWith<TOther, TCombined>(WorkloadResult<TOther> other, Func<TValue, TOther, TCombined> combinator, WorkloadId workloadId, CorrelationId correlationId)
+    {
+        if (_exception is not null) return WorkloadResult<TCombined>.Failure(_exception, workloadId, correlationId);
+        if (other._exception is not null) return WorkloadResult<TCombined>.Failure(other._exception, workloadId, correlationId);
+
+        try
+        {
+            return WorkloadResult<TCombined>.Success(combinator(_value!, other._value!), workloadId, correlationId);
+        }
+        catch (Exception ex)
+        {
+            return WorkloadResult<TCombined>.Failure(ex, workloadId, correlationId);
         }
     }
 }
