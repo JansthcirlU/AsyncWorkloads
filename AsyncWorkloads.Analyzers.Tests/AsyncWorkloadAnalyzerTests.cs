@@ -1,11 +1,12 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using AsyncWorkloads.Attributes;
+using AsyncWorkloads.Workloads;
 
 namespace AsyncWorkloads.Analyzers.Tests;
 
 using AsyncWorkloadAnalyzerTest = CSharpAnalyzerTest<AsyncWorkloadAnalyzer, DefaultVerifier>;
+using PrerequisiteWorkloadAnalyzerTest = CSharpAnalyzerTest<PrerequisiteWorkloadAnalyzer, DefaultVerifier>;
 
 public class AsyncWorkloadAnalyzerTests
 {
@@ -13,28 +14,53 @@ public class AsyncWorkloadAnalyzerTests
     public async Task ClassWithoutSealedOrPartial_WhenDecoratedWithAsyncWorkloadAttribute_ShouldReportErrorDiagnostic()
     {
         // Arrange
-        string source = /* lang=c#-test */
+        AsyncWorkloadAnalyzerTest test = new()
+        {
+            ReferenceAssemblies = ReferenceAssemblies.NetStandard.NetStandard20
+        };
+        test.TestState.AdditionalReferences.Add(typeof(AsyncWorkloadAttribute<>).Assembly);
+
+        // Expect
+        test.TestCode = /* lang=c#-test */
         """
         using AsyncWorkloads.Attributes;
 
         [AsyncWorkload<bool>("Test workload")]
+        public class {|AW001:TestWorkload|}
+        {
+        }
+        """;
+        
+        // Verify
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task PrerequisiteWorkloadAttribute_WhenNotInheritsFromAsyncWorkload_ShouldReportErrorDiagnostic()
+    {
+        // Arrange
+        PrerequisiteWorkloadAnalyzerTest test = new()
+        {
+            ReferenceAssemblies = ReferenceAssemblies.NetStandard.NetStandard20
+        };
+        test.TestState.AdditionalReferences.Add(typeof(AsyncWorkloadAttribute<>).Assembly);
+
+        // Expect
+        test.TestCode = /* lang=c#-test */
+        """
+        using AsyncWorkloads.Attributes;
+
+        public class TestPrerequisiteWorkload
+        {
+            
+        }
+
+        [AsyncWorkload<bool>("Test workload")]
+        [{|AW002:PrerequisiteWorkload<TestPrerequisiteWorkload>|}]
         public class TestWorkload
         {
         }
         """;
-
-        AsyncWorkloadAnalyzerTest test = new()
-        {
-            TestCode = source,
-            ReferenceAssemblies = ReferenceAssemblies.NetStandard.NetStandard20
-        };
-        test.TestState.AdditionalReferences.Add(typeof(AsyncWorkloadAttribute<bool>).Assembly);
-
-        // Expect
-        DiagnosticResult partialOrSealedError = new DiagnosticResult(AsyncWorkloadAnalyzer.DiagnosticId, DiagnosticSeverity.Error)
-                .WithSpan(4, 14, 4, 26)
-                .WithArguments("TestWorkload");
-        test.ExpectedDiagnostics.Add(partialOrSealedError);
         
         // Verify
         await test.RunAsync();

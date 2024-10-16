@@ -28,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AsyncWorkloads.Analyzers\AsyncWorkloads.Analyzers.csproj" />
     <ProjectReference Include="..\AsyncWorkloads.Attributes\AsyncWorkloads.Attributes.csproj" />
+    <ProjectReference Include="..\AsyncWorkloads\AsyncWorkloads.csproj" />
   </ItemGroup>
 
 </Project>
