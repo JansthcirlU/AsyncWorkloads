@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncWorkloads.Analyzers", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncWorkloads.Analyzers.Tests", "AsyncWorkloads.Analyzers.Tests\AsyncWorkloads.Analyzers.Tests.csproj", "{3E3BBE5A-25BB-4386-88DB-AE50CD8BB608}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncWorkloads.Attributes", "AsyncWorkloads.Attributes\AsyncWorkloads.Attributes.csproj", "{C1E40144-46AB-4705-84F0-C1879E4A2DBF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{3E3BBE5A-25BB-4386-88DB-AE50CD8BB608}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E3BBE5A-25BB-4386-88DB-AE50CD8BB608}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E3BBE5A-25BB-4386-88DB-AE50CD8BB608}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1E40144-46AB-4705-84F0-C1879E4A2DBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1E40144-46AB-4705-84F0-C1879E4A2DBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1E40144-46AB-4705-84F0-C1879E4A2DBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1E40144-46AB-4705-84F0-C1879E4A2DBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
