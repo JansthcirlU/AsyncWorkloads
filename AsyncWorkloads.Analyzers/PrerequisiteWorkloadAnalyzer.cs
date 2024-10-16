@@ -38,6 +38,7 @@ namespace AsyncWorkloads.Analyzers
             {
                 foreach (var attribute in attributeList.Attributes)
                 {
+                    // Get the symbol for the attribute.
                     if (!(semanticModel.GetSymbolInfo(attribute).Symbol is IMethodSymbol attributeSymbol))
                         continue;
 
@@ -45,19 +46,20 @@ namespace AsyncWorkloads.Analyzers
                     if (attributeContainingType.Name == "PrerequisiteWorkloadAttribute" &&
                         attributeContainingType.ContainingNamespace.ToDisplayString() == "AsyncWorkloads.Attributes")
                     {
-                        // Get the type argument for TPrerequisiteWorkload
-                        if (attribute.ArgumentList?.Arguments.Count > 0)
+                        // Get the attribute's type information.
+                        if (!(semanticModel.GetTypeInfo(attribute).Type is INamedTypeSymbol attributeType) || attributeType.TypeArguments.Length == 0)
                         {
-                            var prerequisiteTypeSyntax = attribute.ArgumentList.Arguments[0].Expression;
+                            continue;
+                        }
 
-                            if (semanticModel.GetTypeInfo(prerequisiteTypeSyntax).Type is INamedTypeSymbol prerequisiteTypeSymbol)
+                        // Extract the generic type argument for TPrerequisiteWorkload.
+                        if (attributeType.TypeArguments[0] is INamedTypeSymbol prerequisiteTypeSymbol)
+                        {
+                            // Check if prerequisiteTypeSymbol inherits from AsyncWorkload<>.
+                            if (!InheritsFromAsyncWorkload(prerequisiteTypeSymbol, context))
                             {
-                                // Check if prerequisiteTypeSymbol inherits from AsyncWorkload<>
-                                if (!InheritsFromAsyncWorkload(prerequisiteTypeSymbol))
-                                {
-                                    var diagnostic = Diagnostic.Create(Rule, prerequisiteTypeSyntax.GetLocation(), prerequisiteTypeSymbol.Name);
-                                    context.ReportDiagnostic(diagnostic);
-                                }
+                                var diagnostic = Diagnostic.Create(Rule, attribute.GetLocation(), prerequisiteTypeSymbol.Name);
+                                context.ReportDiagnostic(diagnostic);
                             }
                         }
                     }
@@ -65,15 +67,22 @@ namespace AsyncWorkloads.Analyzers
             }
         }
 
-        private static bool InheritsFromAsyncWorkload(INamedTypeSymbol typeSymbol)
+        private static bool InheritsFromAsyncWorkload(INamedTypeSymbol typeSymbol, SyntaxNodeAnalysisContext context)
         {
+            // Look up the AsyncWorkload base type by its metadata name.
+            var asyncWorkloadBaseType = context.Compilation.GetTypeByMetadataName("AsyncWorkloads.Workloads.AsyncWorkload`1");
+            if (asyncWorkloadBaseType == null)
+            {
+                // If the base type cannot be found, ensure the assembly reference is correct.
+                return false;
+            }
+
+            // Traverse the base types to determine inheritance.
             var baseType = typeSymbol.BaseType;
 
             while (baseType != null)
             {
-                if (baseType.Name == "AsyncWorkload" &&
-                    baseType.ContainingNamespace.ToDisplayString() == "AsyncWorkloads.Workloads" &&
-                    baseType.IsGenericType)
+                if (SymbolEqualityComparer.Default.Equals(baseType.OriginalDefinition, asyncWorkloadBaseType))
                 {
                     return true;
                 }
