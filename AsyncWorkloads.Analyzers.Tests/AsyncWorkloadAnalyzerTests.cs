@@ -1,12 +1,12 @@
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using AsyncWorkloads.Attributes;
-using AsyncWorkloads.Workloads;
 
 namespace AsyncWorkloads.Analyzers.Tests;
 
 using AsyncWorkloadModifiersAnalyzerTestTest = CSharpAnalyzerTest<AsyncWorkloadModifiersAnalyzer, DefaultVerifier>;
 using PrerequisiteWorkloadGenericsAnalyzerTest = CSharpAnalyzerTest<PrerequisiteWorkloadGenericsAnalyzer, DefaultVerifier>;
+using WorkloadWithPrerequisitesAnalyzerTest = CSharpAnalyzerTest<WorkloadWithPrerequisitesAnalyzer, DefaultVerifier>;
 
 public class AsyncWorkloadAnalyzerTests
 {
