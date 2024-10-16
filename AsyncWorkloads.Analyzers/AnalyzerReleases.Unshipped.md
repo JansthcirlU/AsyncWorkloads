@@ -6,4 +6,5 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 AW001 | Usage | Error | AsyncWorkloadAnalyzer
-AW002 | Usage | Error | AsyncWorkloadAnalyzer
+AW002 | Usage | Error | PrerequisiteWorkloadGenericsAnalyzer
+AW003 | Usage | Error | WorkloadWithPrerequisitesAnalyzer
