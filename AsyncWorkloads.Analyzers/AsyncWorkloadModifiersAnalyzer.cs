@@ -8,7 +8,7 @@ using System.Linq;
 namespace AsyncWorkloads.Analyzers
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class AsyncWorkloadAnalyzer : DiagnosticAnalyzer
+    public class AsyncWorkloadModifiersAnalyzer : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "AW001";
         private static readonly LocalizableString Title = "Workload must be sealed and partial";

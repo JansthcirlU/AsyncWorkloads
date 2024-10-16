@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace AsyncWorkloads.Analyzers
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class PrerequisiteWorkloadAnalyzer : DiagnosticAnalyzer
+    public class PrerequisiteWorkloadGenericsAnalyzer : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "AW002";
         private static readonly LocalizableString Title = "Prerequisite workload type constraint violation";

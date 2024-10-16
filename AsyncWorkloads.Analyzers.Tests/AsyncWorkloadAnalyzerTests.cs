@@ -5,8 +5,8 @@ using AsyncWorkloads.Workloads;
 
 namespace AsyncWorkloads.Analyzers.Tests;
 
-using AsyncWorkloadAnalyzerTest = CSharpAnalyzerTest<AsyncWorkloadAnalyzer, DefaultVerifier>;
-using PrerequisiteWorkloadAnalyzerTest = CSharpAnalyzerTest<PrerequisiteWorkloadAnalyzer, DefaultVerifier>;
+using AsyncWorkloadModifiersAnalyzerTestTest = CSharpAnalyzerTest<AsyncWorkloadModifiersAnalyzer, DefaultVerifier>;
+using PrerequisiteWorkloadGenericsAnalyzerTest = CSharpAnalyzerTest<PrerequisiteWorkloadGenericsAnalyzer, DefaultVerifier>;
 
 public class AsyncWorkloadAnalyzerTests
 {
@@ -14,7 +14,7 @@ public class AsyncWorkloadAnalyzerTests
     public async Task ClassWithoutSealedOrPartial_WhenDecoratedWithAsyncWorkloadAttribute_ShouldReportErrorDiagnostic()
     {
         // Arrange
-        AsyncWorkloadAnalyzerTest test = new()
+        AsyncWorkloadModifiersAnalyzerTestTest test = new()
         {
             ReferenceAssemblies = ReferenceAssemblies.NetStandard.NetStandard20
         };
@@ -39,7 +39,7 @@ public class AsyncWorkloadAnalyzerTests
     public async Task PrerequisiteWorkloadAttribute_WhenNotInheritsFromAsyncWorkload_ShouldReportErrorDiagnostic()
     {
         // Arrange
-        PrerequisiteWorkloadAnalyzerTest test = new()
+        PrerequisiteWorkloadGenericsAnalyzerTest test = new()
         {
             ReferenceAssemblies = ReferenceAssemblies.NetStandard.NetStandard20
         };
