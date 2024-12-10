@@ -11,6 +11,7 @@ public abstract class AsyncWorkload<TResult>
 {
     private WorkloadState _workloadState = WorkloadState.Undefined;
     private WorkloadResult<TResult>? _result;
+    private Task<WorkloadResult<TResult>>? _workloadTask;
     protected readonly ILogger<AsyncWorkload<TResult>> _logger;
 
     public WorkloadState WorkloadState => _workloadState;
@@ -33,11 +34,24 @@ public abstract class AsyncWorkload<TResult>
     /// <param name="cancellationToken">Token to cancel the execution if needed.</param>
     protected abstract Task<WorkloadResult<TResult>> ExecuteWorkAsync(CorrelationId correlationId, CancellationToken cancellationToken);
 
-    public async Task<WorkloadResult<TResult>> ExecuteAsync(CorrelationId correlationId, CancellationToken cancellationToken)
+    public Task<WorkloadResult<TResult>> ExecuteAsync(CorrelationId correlationId, CancellationToken cancellationToken)
     {
-        // If the workload has already run, simply return the result
-        if (_result is not null) return _result;
+        // If the workload has already started or finished, return the task
+        if (_workloadTask is not null) return _workloadTask;
 
+        lock (this)
+        {
+            if (_workloadTask is not null) return _workloadTask;
+
+            _workloadState = WorkloadState.Queued;
+            _workloadTask = RunWorkloadAsync(correlationId, cancellationToken);
+        }
+
+        return _workloadTask;
+    }
+
+    private async Task<WorkloadResult<TResult>> RunWorkloadAsync(CorrelationId correlationId, CancellationToken cancellationToken)
+    {
         try
         {
             // Start the workload and save the result
